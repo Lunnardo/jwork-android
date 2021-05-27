@@ -23,17 +23,29 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        final Button btnLogin = findViewById(R.id.btn_Login);
-        final TextView tvRegister =  findViewById(R.id.tv_Register);
-        final EditText etEmail = findViewById(R.id.et_Email);
-        final EditText etPassword =  findViewById(R.id.et_Password);
 
+        EditText etEmail = findViewById(R.id.et_Email);
+        EditText etPassword = findViewById(R.id.et_Password);
+        Button btnLogin = findViewById(R.id.btn_Login);
+        TextView tvRegister = findViewById(R.id.tv_Register);
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String email = etEmail.getText().toString();
                 String password = etPassword.getText().toString();
+
+                if(email.isEmpty()){
+                    etEmail.setError("Please enter your email address");
+                    etEmail.requestFocus();
+                    return;
+                }
+
+                if(password.isEmpty()){
+                    etPassword.setError("Please enter your password");
+                    etPassword.requestFocus();
+                    return;
+                }
 
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
@@ -42,6 +54,9 @@ public class LoginActivity extends AppCompatActivity {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject != null) {
                                 Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(loginIntent);
+                                finish();
                             }
                         } catch (JSONException e) {
                             Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
