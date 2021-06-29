@@ -3,6 +3,8 @@ package lunnardo.jwork_android;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
         EditText etEmail = findViewById(R.id.et_reg_Email);
         EditText etPassword = findViewById(R.id.et_reg_Password);
         Button btnRegister = findViewById(R.id.btn_Register);
-
+        Button btnRegShowPassword = findViewById(R.id.btn_reg_show_password);
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,6 +55,23 @@ public class RegisterActivity extends AppCompatActivity {
                 RequestQueue queue = Volley.newRequestQueue(RegisterActivity.this);
                 queue.add(registerRequest);
 
+            }
+        });
+        btnRegShowPassword.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+
+                switch ( event.getAction() ) {
+
+                    case MotionEvent.ACTION_UP:
+                        etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        break;
+
+                    case MotionEvent.ACTION_DOWN:
+                        etPassword.setInputType(InputType.TYPE_CLASS_TEXT);
+                        break;
+
+                }
+                return true;
             }
         });
 

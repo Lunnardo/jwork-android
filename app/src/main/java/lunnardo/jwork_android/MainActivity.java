@@ -1,17 +1,19 @@
 package lunnardo.jwork_android;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -29,18 +31,68 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Recruiter> listRecruiter = new ArrayList<>();
     private ArrayList<Job> jobIdList = new ArrayList<>();
     private HashMap<Recruiter, ArrayList<Job>> childMapping = new HashMap<>();
-
+    private TextView tvNameMain;
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
+    private static int jobseekerId;
+    private static String jobseekerName;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sharedPreferences = getSharedPreferences("login_session", MODE_PRIVATE);
+        tvNameMain = findViewById(R.id.tv_main_name);
+        getSupportActionBar().setTitle("Jwork-Home");
+
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            jobseekerId = extras.getInt("jobseekerId");
+            jobseekerName = extras.getString("jobseekerName");
+            tvNameMain.setText(jobseekerName);
+        }else {
+            jobseekerId = sharedPreferences.getInt("jobseekerId", 0);
+            jobseekerName = sharedPreferences.getString("jobseekerName", "0");
+            tvNameMain.setText(jobseekerName);
+        }
+
 
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
+        expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener(){
+            @Override
+            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+                Intent intent = new Intent(MainActivity.this, ApplyJobActivity.class);
+                int jobId = childMapping.get(listRecruiter.get(i)).get(i1).getId();
+                String jobName = childMapping.get(listRecruiter.get(i)).get(i1).getName();
+                String jobCategory = childMapping.get(listRecruiter.get(i)).get(i1).getCategory();
+                int jobFee = childMapping.get(listRecruiter.get(i)).get(i1).getFee();
+
+                intent.putExtra("job_id", jobId);
+                intent.putExtra("job_name", jobName);
+                intent.putExtra("job_category", jobCategory);
+                intent.putExtra("job_fee", jobFee);
+
+                intent.putExtra("jobseekerId", jobseekerId);
+                intent.putExtra("jobseekerName", jobseekerName);
+
+                startActivity(intent);
+                return true;
+            }
+        });
         refreshList();
+
+        Button btnAppliedJob = findViewById(R.id.btn_applied_job);
+        btnAppliedJob.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SelesaiJobActivity.class);
+                intent.putExtra("jobseekerId", jobseekerId);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
     }
 
     protected void refreshList(){
@@ -108,5 +160,27 @@ public class MainActivity extends AppCompatActivity {
         MenuRequest menuRequest = new MenuRequest(responseListener);
         RequestQueue queue = Volley.newRequestQueue(MainActivity.this);
         queue.add(menuRequest);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.btn_logout) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("loggedIn", false);
+            editor.apply();
+
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

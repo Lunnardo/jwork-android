@@ -9,7 +9,7 @@ import com.android.volley.toolbox.StringRequest;
 
 public class RegisterRequest extends StringRequest {
 
-    private static final String URL = "http://172.20.10.4:8080/jobseeker/register";
+    private static final String URL = NetworkInfo.getIpAddress() + "/jobseeker/register";
     private Map<String, String> params;
 
     public RegisterRequest(String name, String email, String password, Response.Listener<String> listener){
